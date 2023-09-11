@@ -1,4 +1,5 @@
 #include "Setup.h"
+#include "Drive.h"
 
 #include <Servo.h>
 
@@ -19,6 +20,7 @@ void setup() {
 
  //function defined in setup its all the .attach and digitalwrites 
 setupMotors();
+errorCheck();
 
 }
 
