@@ -4,6 +4,9 @@
 #include <PsxControllerHwSpi.h>
 #include <PsxNewLib.h>
 
+#ifndef SETUP_H
+#define SETUP_H
+
 #define DriveM1 6
 #define DriveM2 9
 
@@ -14,3 +17,7 @@ int rightstickRY = (PsxNewLib.Analog(PSS_RY));
 int rightstickRX = (PsxNewLib.Analog(PSS_RX));
 int leftstickLX = (PsxNewLib.Analog(PSS_LX));
 int leftstickLY = (PsxNewLib.Analog(PSS_LY));
+
+void setupMotors();
+
+#endif
