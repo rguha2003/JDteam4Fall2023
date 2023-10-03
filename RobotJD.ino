@@ -30,9 +30,6 @@ Servo Crane;
 
    
   const int Lim1 = LIM1;
-  const int Lim2 = LIM2;
-  //const int Lim3 = LIM3;
-  //const int Lim4 = LIM4;
 
   unsigned long startTime = 0;
   unsigned long interval = 2000; //2000 millisec = 2 sec
@@ -53,9 +50,7 @@ void setup() {
   Crane.attach(CranePin);
 
   pinMode(Lim1, INPUT_PULLUP);
-  pinMode(Lim2, INPUT_PULLUP);
-  //pinMode(Lim3, INPUT_PULLUP);
-  //pinMode(Lim4, INPUT_PULLUP);
+
   Crane.write(90);
 
   Serial.begin(9600);
@@ -67,9 +62,6 @@ void loop() {
  ps2x.read_gamepad();
 
   int Lim1State = digitalRead(Lim1);
-  int Lim2State = digitalRead(Lim2);
-  //int Lim3State = digitalRead(Lim3);
-  //int Lim4State = digitalRead(Lim4);
 
   // Get the values of the left analog stick (X and Y)
   int leftStickX = ps2x.Analog(PSS_LX);
@@ -94,13 +86,9 @@ void loop() {
 //Gripper Controls
   if (GripIn == 1 && GripOut == 0) {
     
-    if(Lim1State == LOW){
-      Gripper.write(90);
-    }
-    else {
     Gripper.write(GripperForward);
     Serial.println("Gripper moving forward");
-    }
+    
   }
   else if(GripOut == 1 && GripIn == 0){
    
@@ -139,7 +127,7 @@ else{
   
  }
  else if(CraneDown == 1 && CraneUp == 0){
-  if(Lim2State == LOW){
+  if(Lim1State == LOW){
     Crane.write(90);
   }
   else{
