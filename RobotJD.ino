@@ -20,8 +20,8 @@ Servo Crane;
 //Limit Switches
 #define LIM1 10
 #define LIM2 11
-#define LIM3 12
-#define LIM4 13
+//#define LIM3 12
+//#define LIM4 13
 //MotorSpeeds(will change as testing progresses)
 #define CraneUpSpeed 120
 #define CraneDownSpeed 70
@@ -31,8 +31,15 @@ Servo Crane;
    
   const int Lim1 = LIM1;
   const int Lim2 = LIM2;
-  const int Lim3 = LIM3;
-  const int Lim4 = LIM4;
+  //const int Lim3 = LIM3;
+  //const int Lim4 = LIM4;
+
+  unsigned long startTime = 0;
+  unsigned long interval = 2000; //2000 millisec = 2 sec
+
+  bool craneRunning = false;
+  bool craneReleased = true;
+  bool timerPaused = false;
 
 PS2X ps2x;
 
@@ -47,8 +54,9 @@ void setup() {
 
   pinMode(Lim1, INPUT_PULLUP);
   pinMode(Lim2, INPUT_PULLUP);
-  pinMode(Lim3, INPUT_PULLUP);
-  pinMode(Lim4, INPUT_PULLUP);
+  //pinMode(Lim3, INPUT_PULLUP);
+  //pinMode(Lim4, INPUT_PULLUP);
+  Crane.write(90);
 
   Serial.begin(9600);
   
@@ -60,8 +68,8 @@ void loop() {
 
   int Lim1State = digitalRead(Lim1);
   int Lim2State = digitalRead(Lim2);
-  int Lim3State = digitalRead(Lim3);
-  int Lim4State = digitalRead(Lim4);
+  //int Lim3State = digitalRead(Lim3);
+  //int Lim4State = digitalRead(Lim4);
 
   // Get the values of the left analog stick (X and Y)
   int leftStickX = ps2x.Analog(PSS_LX);
@@ -96,39 +104,42 @@ void loop() {
   }
   else if(GripOut == 1 && GripIn == 0){
    
-    if(Lim2State == LOW){
-      Gripper.write(90);
-    }
-    else{
     Gripper.write(GripperBack);
     Serial.println("Gripper moving back");
-    }
+    
   }
   else{
     Gripper.write(90);
   };
 
   // Monitoring Window
+if(motorSpeedRight == 90 && motorSpeedLeft == 90 ){
+  return;
+}
+else{
  Serial.print("Left Motor Speed: ");
  Serial.println(motorSpeedLeft);
  Serial.print("Right Motor Speed: ");
  Serial.println( motorSpeedRight);
+}
  //Driving Motors according to Joystick values
  DriveL.write(motorSpeedLeft);
  DriveR.write(motorSpeedRight);
 
-  //Crane Contols
- if (CraneUp == 1 && CraneDown == 0){
-  if(Lim3State == LOW){
-    Crane.write(90);
-  }
-  else{
+  //Crane Contols-------------------------------------------------------
+ if (ps2x.ButtonPressed(CraneUp) && !craneRunning){
+  
   Crane.write(CraneUpSpeed);
   Serial.println("Crane going up");
-  }
+
+  startTime = millis();
+  craneRunning = true;
+  craneReleased = false;
+  timerPaused = false;
+  
  }
  else if(CraneDown == 1 && CraneUp == 0){
-  if(Lim4State == LOW){
+  if(Lim2State == LOW){
     Crane.write(90);
   }
   else{
@@ -140,6 +151,26 @@ void loop() {
   Crane.write(90);
 
  };
+
+if(craneRunning && millis() - startTime >= interval){
+  Crane.write(90);
+  craneRunning = false;
+}
+if (ps2x.ButtonReleased(CraneUp)) {//if the button is released restart timer(real = current timer - old real)
+
+    craneReleased = true;
+
+    if (timerPaused) {
+      startTime += millis() - startTime;
+      timerPaused = false;
+    }
+  }
+  if (ps2x.Button(CraneUp) && craneRunning) {
+
+    if (!timerPaused) {
+      timerPaused = true;
+    }
+  }
 }
 
 
