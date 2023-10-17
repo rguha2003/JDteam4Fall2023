@@ -1,5 +1,7 @@
+#include <Adafruit_MotorShield.h>
 #include <PS2X_lib.h>
 #include <Servo.h>
+
 
 //establishing Servos
 Servo DriveL;
@@ -30,17 +32,22 @@ Servo Crane;
 
    
   const int Lim1 = LIM1;
+  const int Lim2 = LIM2;
 
-  unsigned long startTime = 0;
-  unsigned long interval = 2000; //2000 millisec = 2 sec
+  unsigned long cStartTime = 0;
+  unsigned long cInterval = 2000; //2000 millisec = 2 sec
 
   bool craneRunning = false;
   bool craneReleased = true;
-  bool timerPaused = false;
+  bool cTimerPaused = false;
 
 PS2X ps2x;
 
+Adafruit_MotorShield CraneAFMS = Adafruit_MotorShield();
+Adafruit_DCMotor *CraneDCM = CraneAFMS.getMotor(1);
+
 void setup() {
+CraneAFMS.begin();
 
  ps2x.config_gamepad(PS2_CLK, PS2_CMD, PS2_SEL, PS2_DAT, true, true);
 
@@ -50,6 +57,7 @@ void setup() {
   Crane.attach(CranePin);
 
   pinMode(Lim1, INPUT_PULLUP);
+  pinMode(Lim2, INPUT_PULLUP);
 
   Crane.write(90);
 
@@ -62,6 +70,7 @@ void loop() {
  ps2x.read_gamepad();
 
   int Lim1State = digitalRead(Lim1);
+  int Lim2State = digitalRead(Lim2);
 
   // Get the values of the left analog stick (X and Y)
   int leftStickX = ps2x.Analog(PSS_LX);
@@ -115,51 +124,35 @@ else{
  DriveR.write(motorSpeedRight);
 
   //Crane Contols-------------------------------------------------------
- if (ps2x.ButtonPressed(CraneUp) && !craneRunning){
+ if (CraneDown == 0 && CraneUp == 1){
   
-  Crane.write(CraneUpSpeed);
   Serial.println("Crane going up");
+  analogWrite(2, 120);
+  CraneDCM -> run(FORWARD);
 
-  startTime = millis();
-  craneRunning = true;
-  craneReleased = false;
-  timerPaused = false;
-  
+  if(Lim2State == LOW){
+    CraneDCM -> run(RELEASE);
+  }
  }
  else if(CraneDown == 1 && CraneUp == 0){
+  Serial.println("Crane going Down");
+  analogWrite(2,100);
+  CraneDCM-> run(BACKWARD);
+
   if(Lim1State == LOW){
-    Crane.write(90);
+    CraneDCM -> run(RELEASE);
   }
   else{
-  Crane.write(CraneDownSpeed);
-  Serial.println("Crane going Down");
+  CraneDCM -> run(RELEASE);
+  
   }
  }
  else{
   Crane.write(90);
 
- };
-
-if(craneRunning && millis() - startTime >= interval){
-  Crane.write(90);
-  craneRunning = false;
+ }
 }
-if (ps2x.ButtonReleased(CraneUp)) {//if the button is released restart timer(real = current timer - old real)
 
-    craneReleased = true;
-
-    if (timerPaused) {
-      startTime += millis() - startTime;
-      timerPaused = false;
-    }
-  }
-  if (ps2x.Button(CraneUp) && craneRunning) {
-
-    if (!timerPaused) {
-      timerPaused = true;
-    }
-  }
-}
 
 
 
