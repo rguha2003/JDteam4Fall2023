@@ -82,7 +82,7 @@ void loop() {
 
   // Map the joystick values to motor speeds
   int motorSpeedLeft = map(leftStickY, 0, 255, 0, 180);
-  int motorSpeedRight = map(rightStickX, 0, 255, 0, 180);
+  int motorSpeedRight = map(rightStickX, 0, 255, 180, 0);
 
   // gripper int values Defined
   int GripIn = ps2x.Button(PSB_R1);
