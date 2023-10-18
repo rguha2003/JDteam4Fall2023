@@ -1,4 +1,4 @@
-#include <Adafruit_MotorShield.h>
+
 #include <PS2X_lib.h>
 #include <Servo.h>
 
@@ -18,7 +18,9 @@ Servo Crane;
 #define DriveLpin 6
 #define DriveRpin 7
 #define GripperPin 8
-#define CranePin 9
+//Crane motor driver no longer needs library
+#define CraneDirectionPin 9
+#define CraneSpeedPin A0
 //Limit Switches
 #define LIM1 10
 #define LIM2 11
@@ -34,30 +36,25 @@ Servo Crane;
   const int Lim1 = LIM1;
   const int Lim2 = LIM2;
 
-  unsigned long cStartTime = 0;
-  unsigned long cInterval = 2000; //2000 millisec = 2 sec
-
-  bool craneRunning = false;
-  bool craneReleased = true;
-  bool cTimerPaused = false;
+bool craneMoving;
 
 PS2X ps2x;
 
-Adafruit_MotorShield CraneAFMS = Adafruit_MotorShield();
-Adafruit_DCMotor *CraneDCM = CraneAFMS.getMotor(1);
 
 void setup() {
-CraneAFMS.begin();
+
 
  ps2x.config_gamepad(PS2_CLK, PS2_CMD, PS2_SEL, PS2_DAT, true, true);
 
   DriveL.attach(DriveLpin);
   DriveR.attach(DriveRpin);
   Gripper.attach(GripperPin);
-  Crane.attach(CranePin);
-
+  pinMode(CraneDirectionPin, OUTPUT);
+  pinMode(CraneSpeedPin, OUTPUT);
   pinMode(Lim1, INPUT_PULLUP);
   pinMode(Lim2, INPUT_PULLUP);
+
+  craneMoving = false;
 
   Crane.write(90);
 
@@ -91,6 +88,9 @@ void loop() {
   //Crane int Values Defined
   int CraneUp = ps2x.Button(PSB_L1);
   int CraneDown = ps2x.Button(PSB_L2);
+
+
+
 
 //Gripper Controls
   if (GripIn == 1 && GripOut == 0) {
@@ -127,29 +127,36 @@ else{
  if (CraneDown == 0 && CraneUp == 1){
   
   Serial.println("Crane going up");
-  analogWrite(2, 120);
-  CraneDCM -> run(FORWARD);
+  digitalWrite(CraneDirectionPin, HIGH);
+  analogWrite(CraneSpeedPin, CraneUpSpeed);
+  craneMoving = true;
 
   if(Lim2State == LOW){
-    CraneDCM -> run(RELEASE);
+    analogWrite(CraneSpeedPin, 0);
+    craneMoving = false;
   }
  }
  else if(CraneDown == 1 && CraneUp == 0){
   Serial.println("Crane going Down");
-  analogWrite(2,100);
-  CraneDCM-> run(BACKWARD);
+  analogWrite(CraneSpeedPin, CraneDownSpeed);
+  digitalWrite(CraneDirectionPin, LOW);
+  craneMoving = true;
 
   if(Lim1State == LOW){
-    CraneDCM -> run(RELEASE);
+    analogWrite(CraneSpeedPin, 0);
+    craneMoving = false;
   }
-  else{
-  CraneDCM -> run(RELEASE);
-  
-  }
+
  }
  else{
-  Crane.write(90);
-
+  analogWrite(CraneSpeedPin, 0);
+  craneMoving = false;
+ }
+ //if statement to control if crane is moving then shut off everything else
+ if(craneMoving == true){
+  Gripper.write(90);
+  DriveL.write(90);
+  DriveR.write(90);
  }
 }
 
