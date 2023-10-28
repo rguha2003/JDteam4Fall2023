@@ -1,42 +1,8 @@
-
+#include "SemiAutomaticFunctions.h"
 #include <PS2X_lib.h>
 #include <Servo.h>
 
 
-//establishing Servos
-Servo DriveL;
-Servo DriveR;
-Servo Gripper;
-Servo Crane;
-
-// Arduino Pins
-#define PS2_DAT 2
-#define PS2_CMD 3
-#define PS2_SEL 4
-#define PS2_CLK 5
-//Motor Pins
-#define DriveLpin 6
-#define DriveRpin 7
-#define GripperPin 8
-//Crane motor driver no longer needs library
-#define CraneDirectionPin 9
-#define CraneSpeedPin A0
-//Limit Switches
-#define LIM1 10
-#define LIM2 11
-//#define LIM3 12
-//#define LIM4 13
-//MotorSpeeds(will change as testing progresses)
-#define CraneUpSpeed 120
-#define CraneDownSpeed 70
-#define GripperForward 120
-#define GripperBack 70
-
-   
-  const int Lim1 = LIM1;
-  const int Lim2 = LIM2;
-
-bool craneMoving;
 
 PS2X ps2x;
 
@@ -48,6 +14,8 @@ void setup() {
 
   DriveL.attach(DriveLpin);
   DriveR.attach(DriveRpin);
+  pinMode(6, OUTPUT);
+  pinMode(7, OUTPUT);
   Gripper.attach(GripperPin);
   pinMode(CraneDirectionPin, OUTPUT);
   pinMode(CraneSpeedPin, OUTPUT);
@@ -70,16 +38,16 @@ void loop() {
   int Lim2State = digitalRead(Lim2);
 
   // Get the values of the left analog stick (X and Y)
-  int leftStickX = ps2x.Analog(PSS_LX);
+  //int leftStickX = ps2x.Analog(PSS_LX);
   int leftStickY = ps2x.Analog(PSS_LY);
 
   // Get the values of the right analog stick (X)
-  int rightStickX = ps2x.Analog(PSS_RX);
+  //int rightStickX = ps2x.Analog(PSS_RX);
   int rightStickY = ps2x.Analog(PSS_RY);
 
   // Map the joystick values to motor speeds
   int motorSpeedLeft = map(leftStickY, 0, 255, 0, 180);
-  int motorSpeedRight = map(rightStickX, 0, 255, 180, 0);
+  int motorSpeedRight = map(rightStickY, 0, 255, 180, 0);
 
   // gripper int values Defined
   int GripIn = ps2x.Button(PSB_R1);
@@ -110,19 +78,26 @@ void loop() {
   };
 
   // Monitoring Window
-if(motorSpeedRight == 90 && motorSpeedLeft == 90 ){
-  return;
+int deadZoneMin = 80;
+int deadZoneMax = 200;
+int joystickValRight;
+int joystickValLeft;
+if(joystickValLeft >= deadZoneMin && joystickValLeft <= deadZoneMax ){
+  DriveL.write(90);
 }
 else{
+  DriveL.write(motorSpeedLeft);
  Serial.print("Left Motor Speed: ");
  Serial.println(motorSpeedLeft);
+};
+if(joystickValRight >= deadZoneMin && joystickValRight <= deadZoneMax){
+  DriveR.write(90);
+}
+else{
+ DriveR.write(motorSpeedRight);
  Serial.print("Right Motor Speed: ");
  Serial.println( motorSpeedRight);
 }
- //Driving Motors according to Joystick values
- DriveL.write(motorSpeedLeft);
- DriveR.write(motorSpeedRight);
-
   //Crane Contols-------------------------------------------------------
  if (CraneDown == 0 && CraneUp == 1){
   
