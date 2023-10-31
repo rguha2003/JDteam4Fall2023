@@ -50,12 +50,12 @@ void loop() {
   int motorSpeedRight = map(rightStickY, 0, 255, 180, 0);
 
   // gripper int values Defined
-  int GripIn = ps2x.Button(PSB_R1);
-  int GripOut = ps2x.Button(PSB_R2);
+  int GripIn = ps2x.Button(PSB_PAD_LEFT);
+  int GripOut = ps2x.Button(PSB_PAD_RIGHT);
 
   //Crane int Values Defined
-  int CraneUp = ps2x.Button(PSB_L1);
-  int CraneDown = ps2x.Button(PSB_L2);
+  int CraneUp = ps2x.Button(PSB_PAD_UP);
+  int CraneDown = ps2x.Button(PSB_PAD_DOWN);
 
 
 
@@ -79,11 +79,11 @@ void loop() {
 
   // Monitoring Window
 int deadZoneMin = 80;
-int deadZoneMax = 200;
-int joystickValRight;
-int joystickValLeft;
+int deadZoneMax = 100;
+int joystickValRight = rightStickY;
+int joystickValLeft = leftStickY;
 if(joystickValLeft >= deadZoneMin && joystickValLeft <= deadZoneMax ){
-  DriveL.write(90);
+  DriveL.write(95);
 }
 else{
   DriveL.write(motorSpeedLeft);
@@ -91,7 +91,7 @@ else{
  Serial.println(motorSpeedLeft);
 };
 if(joystickValRight >= deadZoneMin && joystickValRight <= deadZoneMax){
-  DriveR.write(90);
+  DriveR.write(95);
 }
 else{
  DriveR.write(motorSpeedRight);
@@ -106,18 +106,22 @@ else{
   analogWrite(CraneSpeedPin, CraneUpSpeed);
   craneMoving = true;
 
-  if(Lim2State == LOW){
+  if(Lim2State == HIGH){
     analogWrite(CraneSpeedPin, 0);
     craneMoving = false;
   }
  }
- else if(CraneDown == 1 && CraneUp == 0){
+  else{
+  analogWrite(CraneSpeedPin, 0);
+  craneMoving = false;
+ }
+ if(CraneDown == 1 && CraneUp == 0){
   Serial.println("Crane going Down");
   analogWrite(CraneSpeedPin, CraneDownSpeed);
   digitalWrite(CraneDirectionPin, LOW);
   craneMoving = true;
 
-  if(Lim1State == LOW){
+  if(Lim1State == HIGH){
     analogWrite(CraneSpeedPin, 0);
     craneMoving = false;
   }
@@ -133,6 +137,7 @@ else{
   DriveL.write(90);
   DriveR.write(90);
  }
+ 
 }
 
 

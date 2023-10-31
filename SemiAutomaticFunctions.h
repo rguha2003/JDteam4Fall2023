@@ -28,8 +28,8 @@ Servo Crane;
 //#define LIM3 12
 //#define LIM4 13
 //MotorSpeeds(will change as testing progresses)
-#define CraneUpSpeed 120
-#define CraneDownSpeed 70
+#define CraneUpSpeed 255
+#define CraneDownSpeed 200
 #define GripperForward 120
 #define GripperBack 70
 bool direction = true;
