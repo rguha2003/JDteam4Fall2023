@@ -1,3 +1,6 @@
+
+
+
 #include <Servo.h>
 
 #define N1 6
@@ -6,7 +9,7 @@ Servo Drive;
 
 
 void setup() {
-Drive.attach(6);
+Drive.attach(7);
 
 
 }
