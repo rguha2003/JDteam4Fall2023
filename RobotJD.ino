@@ -9,7 +9,7 @@ PS2X ps2x;
 
 void setup() {
 
-
+delay(300);
  ps2x.config_gamepad(PS2_CLK, PS2_CMD, PS2_SEL, PS2_DAT, true, true);
 
   DriveL.attach(DriveLpin);
@@ -48,8 +48,8 @@ void loop() {
   int GripOut = ps2x.Button(PSB_PAD_RIGHT);
 
   //Crane int Values Defined
-  int CraneUp = ps2x.Button(PSB_L2);
-  int CraneDown = ps2x.Button(PSB_L1);//---------------------------------------------temporary change
+  int CraneUp = ps2x.ButtonPressed(PSB_L1);
+  int CraneDown = ps2x.ButtonPressed(PSB_L2);//---------------------------------------------temporary change
 
 //Gripper Controls
   if (GripIn == 1 && GripOut == 0) {
@@ -72,8 +72,8 @@ if(joystickValLeft >= deadZoneMin & joystickValLeft <= deadZoneMax ){
 }
 else{
   DriveL.write(motorSpeedLeft);
- Serial.print("Left Motor Speed: ");
- Serial.println(motorSpeedLeft);
+  Serial.print("Left Motor Speed: ");
+  Serial.println(motorSpeedLeft);
 };
 if(joystickValRight >= deadZoneMin & joystickValRight <= deadZoneMax){
   DriveR.write(driveRDead);
@@ -83,8 +83,30 @@ else{
  Serial.print("Right Motor Speed: ");
  Serial.println( motorSpeedRight);
 }
+//Newer Crane Functions
 
+while(CraneUp & !CraneDown){
+ digitalWrite(CraneDirectionPin, CraneUpSpeed);
+ analogWrite(CraneSpeedPin, 0);
+ craneMoving = true;
+ Serial.print("Crane Up!");
+ if(ps2x.NewButtonState(PSB_L1) | ps2x.NewButtonState(PSB_L2)){ break;}
+}
+//speed and direction pins reverse when changing directions
+while(CraneDown & !CraneUp){
+ digitalWrite(CraneSpeedPin, CraneDownSpeed);
+ analogWrite(CraneDirectionPin, 0);
+ craneMoving = true;
+ Serial.print("Crane Down");
+ if(ps2x.NewButtonState(PSB_L1) | ps2x.NewButtonState(PSB_L2)){break;}
+}
+
+//if{digitalWrite(CraneDirectionPin, 0); analogWrite(CraneSpeedPin, 0);}
   //Crane Contols-------------------------------------------------------
+ 
+ 
+ /*
+ 
  if(CraneDown == 0 && CraneUp == 0){
  
   analogWrite(CraneSpeedPin, 0);
@@ -93,14 +115,14 @@ else{
  }
  else if(CraneDown == 0 && CraneUp == 1){
   Serial.println("Crane going up");
-  digitalWrite(CraneDirectionPin, LOW);
+  digitalWrite(CraneDirectionPin, HIGH);
   analogWrite(CraneSpeedPin, CraneUpSpeed);
   craneMoving = true;
   
  }
  else if(CraneDown == 1 && CraneUp == 0){
   Serial.println("Crane going Down");
-  digitalWrite(CraneSpeedPin, HIGH);
+  digitalWrite(CraneSpeedPin, LOW);
   analogWrite(CraneDirectionPin, CraneDownSpeed);
   craneMoving = true;
  }
@@ -109,11 +131,12 @@ else{
 
  //if statement to control if crane is moving then shut off everything else
  
+ 
  if(craneMoving == true){
   Gripper.write(95);
   DriveL.write(95);
   DriveR.write(95);
- }
+ }*/
 }
 
 

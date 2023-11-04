@@ -20,8 +20,8 @@ Servo Crane;
 #define DriveRpin 6
 #define GripperPin 8
 //Crane motor driver no longer needs library
-#define CraneDirectionPin 9
-#define CraneSpeedPin 13
+#define CraneDirectionPin 9  //IN1
+#define CraneSpeedPin 13 //IN2
 #define IN1 9 //Semi-permanent
 #define IN2 13
 //Limit Switches
