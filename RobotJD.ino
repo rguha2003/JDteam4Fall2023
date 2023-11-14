@@ -42,8 +42,7 @@ void loop() {
   int Lim2State = digitalRead(Lim2);//1 if pressed
   int L1;
   int L2;
-  int leftStickY = ps2x.Analog(PSS_LY);
-  int rightStickY = ps2x.Analog(PSS_RY);
+ 
 
  
   // gripper int values Defined
